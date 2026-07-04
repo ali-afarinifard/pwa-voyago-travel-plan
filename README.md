@@ -5,11 +5,10 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![PWA](https://img.shields.io/badge/PWA-Serwist-5A0FC8?logo=pwa&logoColor=white)](https://serwist.pages.dev)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 Voyago lets you explore destinations worldwide — with live weather and exchange rates — and build a day‑by‑day trip itinerary that keeps working with no internet connection at all. It's built as a frontend portfolio piece, so the emphasis throughout is on architecture and engineering decisions, not just shipping features.
 
-**[Live demo →](#)** &nbsp;·&nbsp; **[Repository](https://github.com/ali-afarinifard/voyago-travel-plan)**
+**[Live demo →](https://voyago-travel.vercel.app/)** &nbsp;·&nbsp; **[Repository](https://github.com/ali-afarinifard/voyago-travel-plan)**
 
 <!--
   TODO: replace the placeholders above/below once deployed.
@@ -39,13 +38,13 @@ A few decisions worth a reviewer's attention:
 
 ## Features
 
-- 🌍 **Explore destinations** — filterable grid of every country, backed by a GraphQL API, with flags/coordinates/population from a REST source and current weather layered on top
-- 🗺️ **Interactive maps** — Leaflet, lazy-loaded so it never blocks the initial page load
-- 💱 **Live currency conversion** — daily exchange rates, cached to stay usable offline
-- 🧳 **Drag-and-drop itinerary board** — plan a trip day by day, reorder or move activities between days with `@dnd-kit` (mouse, touch, and keyboard)
-- 📶 **True offline mode** — install the app, go offline, and previously visited destinations, weather, exchange rates, map tiles, and your saved trips are all still there
-- 🎨 **Custom design system** — a "map & boarding pass" visual identity, CSS custom properties mirrored into Ant Design's theme tokens
-- 🌗 **Light/dark theme** with no flash-of-wrong-theme on load
+- **Explore destinations** — filterable grid of every country, backed by a GraphQL API, with flags/coordinates/population from a REST source and current weather layered on top
+- **Interactive maps** — Leaflet, lazy-loaded so it never blocks the initial page load
+- **Live currency conversion** — daily exchange rates, cached to stay usable offline
+- **Drag-and-drop itinerary board** — plan a trip day by day, reorder or move activities between days with `@dnd-kit` (mouse, touch, and keyboard)
+- **True offline mode** — install the app, go offline, and previously visited destinations, weather, exchange rates, map tiles, and your saved trips are all still there
+- **Custom design system** — a "map & boarding pass" visual identity, CSS custom properties mirrored into Ant Design's theme tokens
+- **Light/dark theme** with no flash-of-wrong-theme on load
 
 ---
 
@@ -154,9 +153,3 @@ voyago/
 ├── public/icons/          # PWA icons (maskable + standard)
 └── scripts/               # Icon generation
 ```
-
----
-
-## License
-
-MIT — see [`LICENSE`](./LICENSE).
