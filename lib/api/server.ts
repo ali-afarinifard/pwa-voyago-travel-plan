@@ -1,0 +1,360 @@
+import {
+  COUNTRIES_GRAPHQL_ENDPOINT,
+  GET_CONTINENTS,
+  GET_COUNTRIES,
+  GET_COUNTRY,
+} from "@/lib/graphql/queries";
+import { describeWeatherCode } from "@/lib/utils/weather";
+import type {
+  Continent,
+  Country,
+  CountryDetails,
+  ExchangeRatesResponse,
+  OpenMeteoResponse,
+  WeatherSummary,
+} from "@/lib/types/travel";
+
+const REVALIDATE_COUNTRIES = 60 * 60 * 24;
+const REVALIDATE_WEATHER = 60 * 15;
+const REVALIDATE_RATES = 60 * 60;
+
+async function graphqlFetch<T>(
+  document: string,
+  variables?: Record<string, unknown>,
+  revalidate = REVALIDATE_COUNTRIES,
+): Promise<T> {
+  const res = await fetch(COUNTRIES_GRAPHQL_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query: document, variables }),
+    next: { revalidate },
+  });
+  if (!res.ok)
+    throw new Error(`GraphQL request failed with status ${res.status}`);
+  const json = await res.json();
+  if (json.errors?.length) throw new Error(json.errors[0].message);
+  return json.data as T;
+}
+
+export async function getAllCountries(): Promise<Country[]> {
+  try {
+    const data = await graphqlFetch<{ countries: Country[] }>(GET_COUNTRIES);
+    return data.countries;
+  } catch {
+    return [];
+  }
+}
+
+export async function getCountry(code: string): Promise<Country | null> {
+  try {
+    const data = await graphqlFetch<{ country: Country | null }>(GET_COUNTRY, {
+      code,
+    });
+    return data.country;
+  } catch {
+    return null;
+  }
+}
+
+export async function getContinents(): Promise<Continent[]> {
+  try {
+    const data = await graphqlFetch<{ continents: Continent[] }>(
+      GET_CONTINENTS,
+    );
+    return data.continents;
+  } catch {
+    return [];
+  }
+}
+
+export async function getCountryDetails(
+  code: string,
+): Promise<CountryDetails | null> {
+  try {
+    const res = await fetch(`https://flag.vercel.app/api/${code}`, {
+      next: { revalidate: REVALIDATE_COUNTRIES },
+    });
+
+    const coords = COUNTRY_COORDS[code.toUpperCase()];
+
+    return {
+      latlng: coords ?? null,
+      flagPng: `https://flagcdn.com/w320/${code.toLowerCase()}.png`,
+      flagAlt: `Flag of ${code}`,
+      population: null,
+      subregion: null,
+    };
+  } catch {
+    return {
+      latlng: COUNTRY_COORDS[code.toUpperCase()] ?? null,
+      flagPng: `https://flagcdn.com/w320/${code.toLowerCase()}.png`,
+      flagAlt: `Flag of ${code}`,
+      population: null,
+      subregion: null,
+    };
+  }
+}
+
+const COUNTRY_COORDS: Record<string, [number, number]> = {
+  AF: [33.93, 67.71],
+  AL: [41.15, 20.17],
+  DZ: [28.03, 1.66],
+  AD: [42.55, 1.6],
+  AO: [-11.2, 17.87],
+  AG: [17.06, -61.8],
+  AR: [-38.42, -63.62],
+  AM: [40.07, 45.04],
+  AU: [-25.27, 133.78],
+  AT: [47.52, 14.55],
+  AZ: [40.14, 47.58],
+  BS: [25.03, -77.4],
+  BH: [26.0, 50.55],
+  BD: [23.68, 90.35],
+  BB: [13.19, -59.54],
+  BY: [53.71, 27.95],
+  BE: [50.5, 4.47],
+  BZ: [17.19, -88.5],
+  BJ: [9.31, 2.32],
+  BT: [27.51, 90.43],
+  BO: [-16.29, -63.59],
+  BA: [43.92, 17.68],
+  BW: [-22.33, 24.68],
+  BR: [-14.24, -51.93],
+  BN: [4.54, 114.73],
+  BG: [42.73, 25.49],
+  BF: [12.36, -1.56],
+  BI: [-3.37, 29.92],
+  CV: [16.54, -23.04],
+  KH: [12.57, 104.99],
+  CM: [3.85, 11.5],
+  CA: [56.13, -106.35],
+  CF: [6.61, 20.94],
+  TD: [15.45, 18.73],
+  CL: [-35.68, -71.54],
+  CN: [35.86, 104.2],
+  CO: [4.57, -74.3],
+  KM: [-11.65, 43.33],
+  CG: [-0.23, 15.83],
+  CR: [9.75, -83.75],
+  HR: [45.1, 15.2],
+  CU: [21.52, -77.78],
+  CY: [35.13, 33.43],
+  CZ: [49.82, 15.47],
+  DK: [56.26, 9.5],
+  DJ: [11.83, 42.59],
+  DM: [15.41, -61.37],
+  DO: [18.74, -70.16],
+  EC: [-1.83, -78.18],
+  EG: [26.82, 30.8],
+  SV: [13.79, -88.9],
+  GQ: [1.65, 10.27],
+  ER: [15.18, 39.78],
+  EE: [58.6, 25.01],
+  SZ: [-26.52, 31.47],
+  ET: [9.14, 40.49],
+  FJ: [-16.58, 179.41],
+  FI: [61.92, 25.75],
+  FR: [46.23, 2.21],
+  GA: [-0.8, 11.61],
+  GM: [13.44, -15.31],
+  GE: [42.32, 43.36],
+  DE: [51.17, 10.45],
+  GH: [7.95, -1.02],
+  GR: [39.07, 21.82],
+  GD: [12.11, -61.68],
+  GT: [15.78, -90.23],
+  GN: [9.95, -11.24],
+  GW: [11.8, -15.18],
+  GY: [4.86, -58.93],
+  HT: [18.97, -72.29],
+  HN: [15.2, -86.24],
+  HU: [47.16, 19.5],
+  IS: [64.96, -19.02],
+  IN: [20.59, 78.96],
+  ID: [-0.79, 113.92],
+  IR: [32.43, 53.69],
+  IQ: [33.22, 43.68],
+  IE: [53.41, -8.24],
+  IL: [31.05, 34.85],
+  IT: [41.87, 12.57],
+  JM: [18.11, -77.3],
+  JP: [36.2, 138.25],
+  JO: [30.59, 36.24],
+  KZ: [48.02, 66.92],
+  KE: [-0.02, 37.91],
+  KI: [-3.37, -168.73],
+  KP: [40.34, 127.51],
+  KR: [35.91, 127.77],
+  KW: [29.31, 47.48],
+  KG: [41.2, 74.77],
+  LA: [19.86, 102.5],
+  LV: [56.88, 24.6],
+  LB: [33.85, 35.86],
+  LS: [-29.61, 28.23],
+  LR: [6.43, -9.43],
+  LY: [26.34, 17.23],
+  LI: [47.14, 9.55],
+  LT: [55.17, 23.88],
+  LU: [49.82, 6.13],
+  MG: [-18.77, 46.87],
+  MW: [-13.25, 34.3],
+  MY: [4.21, 108.96],
+  MV: [3.2, 73.22],
+  ML: [17.57, -3.99],
+  MT: [35.94, 14.37],
+  MH: [7.13, 171.18],
+  MR: [21.01, -10.94],
+  MU: [-20.35, 57.55],
+  MX: [23.63, -102.55],
+  FM: [7.43, 150.55],
+  MD: [47.41, 28.37],
+  MC: [43.75, 7.4],
+  MN: [46.86, 103.85],
+  ME: [42.71, 19.37],
+  MA: [31.79, -7.09],
+  MZ: [-18.67, 35.53],
+  MM: [21.91, 95.96],
+  NA: [-22.96, 18.49],
+  NR: [-0.52, 166.93],
+  NP: [28.39, 84.12],
+  NL: [52.13, 5.29],
+  NZ: [-40.9, 174.89],
+  NI: [12.87, -85.21],
+  NE: [17.61, 8.08],
+  NG: [9.08, 8.68],
+  NO: [60.47, 8.47],
+  OM: [21.51, 55.92],
+  PK: [30.38, 69.35],
+  PW: [7.51, 134.58],
+  PA: [8.54, -80.78],
+  PG: [-6.31, 143.96],
+  PY: [-23.44, -58.44],
+  PE: [-9.19, -75.02],
+  PH: [12.88, 121.77],
+  PL: [51.92, 19.15],
+  PT: [39.4, -8.22],
+  QA: [25.35, 51.18],
+  RO: [45.94, 24.97],
+  RU: [61.52, 105.32],
+  RW: [-1.94, 29.87],
+  KN: [17.36, -62.78],
+  LC: [13.91, -60.98],
+  VC: [12.98, -61.29],
+  WS: [-13.76, -172.1],
+  SM: [43.94, 12.46],
+  ST: [0.19, 6.61],
+  SA: [23.89, 45.08],
+  SN: [14.5, -14.45],
+  RS: [44.02, 21.01],
+  SC: [-4.68, 55.49],
+  SL: [8.46, -11.78],
+  SG: [1.35, 103.82],
+  SK: [48.67, 19.7],
+  SI: [46.15, 14.99],
+  SB: [-9.64, 160.16],
+  SO: [5.15, 46.2],
+  ZA: [-30.56, 22.94],
+  SS: [6.88, 31.31],
+  ES: [40.46, -3.75],
+  LK: [7.87, 80.77],
+  SD: [12.86, 30.22],
+  SR: [3.92, -56.03],
+  SE: [60.13, 18.64],
+  CH: [46.82, 8.23],
+  SY: [34.8, 38.99],
+  TW: [23.7, 120.96],
+  TJ: [38.86, 71.28],
+  TZ: [-6.37, 34.89],
+  TH: [15.87, 100.99],
+  TL: [-8.87, 125.73],
+  TG: [8.62, 0.82],
+  TO: [-21.18, -175.2],
+  TT: [10.69, -61.22],
+  TN: [33.89, 9.54],
+  TR: [38.96, 35.24],
+  TM: [38.97, 59.56],
+  TV: [-7.11, 177.65],
+  UG: [1.37, 32.29],
+  UA: [48.38, 31.17],
+  AE: [23.42, 53.85],
+  GB: [55.38, -3.44],
+  US: [37.09, -95.71],
+  UY: [-32.52, -55.77],
+  UZ: [41.38, 64.59],
+  VU: [-15.38, 166.96],
+  VE: [6.42, -66.59],
+  VN: [14.06, 108.28],
+  YE: [15.55, 48.52],
+  ZM: [-13.13, 27.85],
+  ZW: [-19.02, 29.15],
+  CD: [-4.04, 21.76],
+  CK: [-21.24, -159.78],
+  CX: [-10.49, 105.63],
+  FK: [-51.8, -59.52],
+  FO: [61.89, -6.91],
+  GF: [3.93, -53.13],
+  GI: [36.14, -5.35],
+  GL: [71.71, -42.6],
+  GP: [16.99, -62.07],
+  GU: [13.44, 144.79],
+  HK: [22.4, 114.11],
+  MO: [22.17, 113.55],
+  MQ: [14.64, -61.02],
+  NC: [-20.9, 165.62],
+  NF: [-29.04, 167.95],
+  MP: [17.33, 145.38],
+  PF: [-17.68, -149.41],
+  PM: [46.94, -56.27],
+  PR: [18.22, -66.59],
+  RE: [-21.11, 55.54],
+  SH: [-15.97, -5.71],
+  SJ: [77.55, 23.67],
+  TC: [21.69, -71.8],
+  VI: [18.34, -64.9],
+  WF: [-13.77, -177.16],
+};
+
+export async function getWeather(
+  lat: number,
+  lon: number,
+): Promise<WeatherSummary | null> {
+  try {
+    const res = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`,
+      { next: { revalidate: REVALIDATE_WEATHER } },
+    );
+    if (!res.ok) return null;
+    const data: OpenMeteoResponse = await res.json();
+    const { condition, icon } = describeWeatherCode(
+      data.current_weather.weathercode,
+    );
+    return {
+      temperature: data.current_weather.temperature,
+      windspeed: data.current_weather.windspeed,
+      weatherCode: data.current_weather.weathercode,
+      condition,
+      icon,
+      observedAt: data.current_weather.time,
+      timezone: data.timezone,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function getExchangeRates(
+  base: string,
+): Promise<ExchangeRatesResponse | null> {
+  try {
+    const res = await fetch(
+      `https://api.frankfurter.dev/v1/latest?from=${base}`,
+      {
+        next: { revalidate: REVALIDATE_RATES },
+      },
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}

@@ -1,0 +1,180 @@
+@import "tailwindcss";
+
+/* Enable class-based dark mode (toggled via .dark on <html>) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+   Keep these in sync with lib/design-tokens.ts (used by AntD's
+   ConfigProvider, which needs raw JS values for its CSS-in-JS
+   theme algorithm). */
+@theme {
+  /* Core palette */
+  --color-ink: #0f1b33;
+  --color-ink-soft: #1b2c4d;
+  --color-ink-line: #2a3b5c;
+  --color-parchment: #faf6f0;
+  --color-parchment-soft: #f1eadd;
+  --color-compass: #f2a93b;
+  --color-compass-soft: #ffd89b;
+  --color-sage: #4a6358;
+  --color-sage-light: #7a9b8e;
+  --color-mist: #8fb3cc;
+  --color-terracotta: #c2553d;
+
+  /* Semantic tokens (overridden by .dark below) */
+  --color-background: var(--color-parchment);
+  --color-foreground: var(--color-ink);
+  --color-surface: #ffffff;
+  --color-surface-muted: var(--color-parchment-soft);
+  --color-border: #e4dcc9;
+  --color-primary: var(--color-compass);
+  --color-primary-foreground: var(--color-ink);
+  --color-secondary: var(--color-sage);
+  --color-accent: var(--color-mist);
+  --color-danger: var(--color-terracotta);
+
+  /* Typography */
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-manrope);
+  --font-mono: var(--font-jetbrains-mono);
+
+  /* Radii */
+  --radius-card: 1.25rem;
+  --radius-pill: 999px;
+  --radius-stamp: 0.5rem;
+
+  /* Shadows */
+  --shadow-card: 0 1px 2px rgba(15, 27, 51, 0.04), 0 12px 32px -16px rgba(15, 27, 51, 0.18);
+  --shadow-card-dark: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 40px -20px rgba(0, 0, 0, 0.6);
+
+  /* Layout */
+  --container-page: 1280px;
+}
+
+/* Dark mode (night map) */
+.dark {
+  --color-background: var(--color-ink);
+  --color-foreground: var(--color-parchment);
+  --color-surface: var(--color-ink-soft);
+  --color-surface-muted: #16264a;
+  --color-border: var(--color-ink-line);
+  --color-primary: var(--color-compass);
+  --color-primary-foreground: var(--color-ink);
+  --color-secondary: var(--color-sage-light);
+  --color-accent: var(--color-mist);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Respect reduced motion preferences everywhere */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visible focus ring for keyboard navigation (a11y) */
+:focus-visible {
+  outline: 2px solid var(--color-compass);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* SIGNATURE TEXTURES & MOTIFS */
+
+/* Subtle topographic contour-line texture, used as an ambient
+   background layer behind hero / section panels. */
+.bg-topo {
+  background-image:
+    repeating-radial-gradient(circle at 20% 30%, transparent 0, transparent 38px, color-mix(in srgb, var(--color-foreground) 4%, transparent) 39px, transparent 41px),
+    repeating-radial-gradient(circle at 80% 70%, transparent 0, transparent 52px, color-mix(in srgb, var(--color-foreground) 3%, transparent) 53px, transparent 56px);
+  background-size: 100% 100%;
+}
+
+/* "Boarding pass" card: rounded body + perforated divider notch.
+   Use alongside .stub-divider for the torn-edge divider line. */
+.boarding-pass {
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-border);
+}
+.dark .boarding-pass {
+  box-shadow: var(--shadow-card-dark);
+}
+
+/* Perforated divider between a boarding-pass card's main body
+   and its "stub" (price / quick action area). */
+.stub-divider {
+  position: relative;
+  border: none;
+  height: 1px;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--color-border) 0,
+    var(--color-border) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+.stub-divider::before,
+.stub-divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 1.25rem;
+  height: 1.25rem;
+  background: var(--color-background);
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+.stub-divider::before {
+  left: -0.625rem;
+}
+.stub-divider::after {
+  right: -0.625rem;
+}
+
+/* "Flight route" stroke used by the RouteLine signature motif. Paths use
+   `pathLength="1"`, so a dash length of 1 plus an animated dashoffset
+   produces a clean "drawing in" reveal regardless of the path's geometry. */
+.route-line {
+  stroke: var(--color-compass);
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+}
+.route-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: route-draw 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes route-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Coordinate / data chips rendered in mono, ticket-stub style */
+.font-tabular {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum" 1;
+  letter-spacing: 0.02em;
+}
