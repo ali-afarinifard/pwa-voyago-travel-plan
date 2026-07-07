@@ -37,7 +37,14 @@ function SortableActivity({
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: activity.id,
   });
 
@@ -64,16 +71,22 @@ function SortableActivity({
       </span>
 
       <div className="flex-1 overflow-hidden">
-        <p className="truncate font-medium text-(--color-foreground)">{activity.title}</p>
+        <p className="truncate font-medium text-(--color-foreground)">
+          {activity.title}
+        </p>
         <div className="flex items-center gap-2 text-xs text-(--color-foreground)/50">
-          {activity.time && <span className="font-tabular">{activity.time}</span>}
+          {activity.time && (
+            <span className="font-tabular">{activity.time}</span>
+          )}
+          {"-"}
           {activity.cost != null && (
             <span className="font-tabular">
               {activity.cost.toLocaleString()}
+              {" USD"}
             </span>
           )}
-          {activity.note && <span className="truncate">{activity.note}</span>}
         </div>
+        {activity.note && <span className="truncate text-xs text-(--color-foreground)/50">{activity.note}</span>}
       </div>
 
       <div className="flex shrink-0 gap-1">
@@ -81,7 +94,7 @@ function SortableActivity({
           type="button"
           onClick={onEdit}
           aria-label={`Edit ${activity.title}`}
-          className="flex h-7 w-7 items-center justify-center rounded-full text-(--color-foreground)/40 hover:bg-(--color-surface-muted) hover:text-(--color-foreground)"
+          className="flex h-7 w-7 items-center justify-center rounded-full text-(--color-foreground)/40 hover:bg-(--color-surface-muted) hover:text-(--color-foreground) cursor-pointer"
         >
           <Pencil size={13} aria-hidden="true" />
         </button>
@@ -89,7 +102,7 @@ function SortableActivity({
           type="button"
           onClick={onDelete}
           aria-label={`Delete ${activity.title}`}
-          className="flex h-7 w-7 items-center justify-center rounded-full text-(--color-foreground)/40 hover:bg-(--color-terracotta)/10 hover:text-(--color-terracotta)"
+          className="flex h-7 w-7 items-center justify-center rounded-full text-(--color-foreground)/40 hover:bg-(--color-terracotta)/10 hover:text-(--color-terracotta) cursor-pointer"
         >
           <Trash2 size={13} aria-hidden="true" />
         </button>
@@ -111,7 +124,9 @@ export function ActivityList({
   onEdit,
   onDelete,
 }: ActivityListProps) {
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+  );
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -130,8 +145,15 @@ export function ActivityList({
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext items={activities.map((a) => a.id)} strategy={verticalListSortingStrategy}>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext
+        items={activities.map((a) => a.id)}
+        strategy={verticalListSortingStrategy}
+      >
         <ul className="flex flex-col gap-2">
           {activities.map((activity) => (
             <SortableActivity

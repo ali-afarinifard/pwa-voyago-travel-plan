@@ -82,7 +82,7 @@ export function ItineraryBoard({ trip }: ItineraryBoardProps) {
               <button
                 type="button"
                 onClick={() => setAddingDayId(day.id)}
-                className="inline-flex items-center gap-1 text-xs font-medium text-(--color-primary) hover:underline"
+                className="inline-flex items-center gap-1 text-xs font-medium text-(--color-primary) hover:underline cursor-pointer"
               >
                 <PlusCircle size={13} aria-hidden="true" />
                 Add
