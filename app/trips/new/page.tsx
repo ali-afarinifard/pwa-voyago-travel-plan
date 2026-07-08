@@ -144,6 +144,7 @@ export default function NewTripPage() {
             classNames={{ popup: { root: "trip-range-popup" } }}
             disabledDate={(d) => d.isBefore(dayjs().startOf("day"))}
             format="MMM D, YYYY"
+            inputReadOnly
           />
         </Form.Item>
 
