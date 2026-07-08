@@ -77,7 +77,7 @@ export function ActivityModal({ open, onClose, onSave, initial }: ActivityModalP
 
         <div className="grid grid-cols-2 gap-4">
           <Form.Item name="time" label="Time">
-            <TimePicker className="w-full" format="HH:mm" minuteStep={15} />
+            <TimePicker className="w-full" format="HH:mm" minuteStep={15} inputReadOnly />
           </Form.Item>
           <Form.Item name="category" label="Category">
             <Select
